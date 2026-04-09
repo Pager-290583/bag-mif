@@ -1,0 +1,1 @@
+Nothing should be ignored since the changes only include source/config files (.md, .html) without any build artifacts, dependencies, or temp files.
