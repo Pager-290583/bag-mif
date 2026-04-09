@@ -227,7 +227,12 @@
     }
 
     function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = "none";
+      } else {
+        console.warn("Модальное окно с ID " + modalId + " не найдено");
+      }
     }
 
     // Закрытие по клику вне окна
