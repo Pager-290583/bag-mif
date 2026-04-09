@@ -242,44 +242,50 @@
         }
     }
 
-    async function submitForm(event, sheetName) {
-        event.preventDefault();
-        const form = event.target;
-        const statusDiv = form.querySelector('.status-msg');
-        const submitBtn = form.querySelector('button[type="submit"]');
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Отправка...';
-        statusDiv.textContent = '';
-        statusDiv.className = 'status-msg';
+    async function submitForm(event, formElement, sheetName) {
+    event.preventDefault();
+    
+    const formData = new FormData(formElement);
+    const data = Object.fromEntries(formData.entries());
+    data.sheetName = sheetName; // Добавляем имя листа
 
-        const formData = new FormData(form);
+    const submitBtn = formElement.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Отправка...";
 
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-                // Важно: не устанавливаем Content-Type вручную для FormData, 
-                // браузер сделает это сам с границами (boundary)
-            });
+    try {
+        // ВАЖНО: Используем ваш URL из шага 2
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec'; 
 
-            if (response.ok) {
-                statusDiv.textContent = 'Заявка успешно отправлена!';
-                statusDiv.classList.add('success');
-                form.reset();
-                setTimeout(() => closeModal(form.parentElement.id), 2000);
-            } else {
-                throw new Error('Ошибка сервера');
+        const response = await fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify(data), // Отправляем как JSON
+            headers: {
+                'Content-Type': 'application/json' // Указываем тип JSON
             }
-        } catch (error) {
-            statusDiv.textContent = 'Ошибка отправки. Попробуйте позже.';
-            statusDiv.classList.add('error');
-            console.error('Error:', error);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Отправить';
+        });
+
+        const result = await response.json();
+
+        if (result.result === 'success') {
+            alert('Заявка успешно отправлена!');
+            formElement.reset();
+            // Закрытие модального окна (убедитесь, что ID верный)
+            const modal = formElement.closest('.modal');
+            if (modal) modal.style.display = 'none';
+        } else {
+            alert('Ошибка: ' + result.message);
+            console.error(result.message);
         }
+    } catch (error) {
+        alert('Ошибка сети: ' + error.message);
+        console.error('Error:', error);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalText;
     }
+}
 </script>
 
 </body>
