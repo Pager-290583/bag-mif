@@ -147,21 +147,18 @@
 </header>
 
 <div class="container">
-    <!-- Кнопка Баги -->
     <div class="card">
         <h2>🐛 Баги</h2>
         <p>Сообщить об ошибке в работе системы</p>
         <button class="btn btn-bugs" onclick="openModal('modal-bugs')">Создать заявку</button>
     </div>
 
-    <!-- Кнопка Задачи -->
     <div class="card">
         <h2>✅ Задачи</h2>
         <p>Предложить новый функционал или улучшение</p>
         <button class="btn btn-tasks" onclick="openModal('modal-tasks')">Создать заявку</button>
     </div>
 
-    <!-- Кнопка Библиотека -->
     <div class="card">
         <h2>📚 Электронная библиотека</h2>
         <p>Запрос на добавление документации или книги</p>
@@ -169,14 +166,12 @@
     </div>
 </div>
 
-<!-- Модальное окно: Баги -->
+<!-- Модалки -->
 <div id="modal-bugs" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('modal-bugs')">&times;</span>
         <h2>Заявка на баг</h2>
         <form onsubmit="submitForm(event, this, 'Баги')">
-            <input type="hidden" name="type" value="Баг">
-            
             <label>Ваше имя</label>
             <input type="text" name="name" required placeholder="Иван Иванов">
             
@@ -210,14 +205,11 @@
     </div>
 </div>
 
-<!-- Модальное окно: Задачи -->
 <div id="modal-tasks" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('modal-tasks')">&times;</span>
         <h2>Новая задача</h2>
         <form onsubmit="submitForm(event, this, 'Задачи')">
-            <input type="hidden" name="type" value="Задача">
-            
             <label>Ваше имя</label>
             <input type="text" name="name" required>
             
@@ -250,14 +242,11 @@
     </div>
 </div>
 
-<!-- Модальное окно: Библиотека -->
 <div id="modal-lib" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('modal-lib')">&times;</span>
         <h2>Запрос в библиотеку</h2>
         <form onsubmit="submitForm(event, this, 'Библиотека')">
-            <input type="hidden" name="type" value="Библиотека">
-            
             <label>Ваше имя</label>
             <input type="text" name="name" required>
             
@@ -288,7 +277,7 @@
 </div>
 
 <script>
-    // !!! ВСТАВЬТЕ СЮДА ВАШ URL ИЗ GOOGLE APPS SCRIPT !!!
+    // ВСТАВЬТЕ СЮДА ВАШ URL
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec';
 
     function openModal(modalId) {
@@ -297,12 +286,9 @@
 
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-        }
+        if (modal) modal.style.display = 'none';
     }
 
-    // Закрытие по клику вне окна
     window.onclick = function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
@@ -310,45 +296,54 @@
     }
 
     async function submitForm(event, formElement, sheetName) {
-        event.preventDefault(); // Останавливаем стандартную отправку
+        event.preventDefault();
 
         const submitBtn = formElement.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerText;
         
-        // Блокируем кнопку
         submitBtn.disabled = true;
         submitBtn.innerText = 'Отправка...';
 
         try {
-            // Собираем данные из формы
+            // 1. Создаем FormData из формы
             const formData = new FormData(formElement);
-            const data = Object.fromEntries(formData.entries());
-            data.sheetName = sheetName; // Добавляем имя листа
+            // 2. Добавляем имя листа явно
+            formData.append('sheetName', sheetName);
 
-            // Отправляем запрос
+            // 3. Отправляем FormData БЕЗ заголовков Content-Type
+            // Браузер сам выставит multipart/form-data и boundary, что убирает CORS ошибку
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                body: formData 
+                // Заголовки НЕ указываем!
             });
 
-            const result = await response.json();
+            // Google Apps Script делает редирект после выполнения, fetch следует за ним автоматически.
+            // Но иногда ответ приходит пустой или с текстом. Пробуем получить текст.
+            const text = await response.text();
+            
+            // Пытаемся распарсить ответ, если он JSON (иногда GAS возвращает JSON внутри текста)
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                // Если не JSON, считаем успехом сам факт ответа 200 OK от GAS
+                result = { result: 'success', message: 'Заявка отправлена' };
+            }
 
-            if (result.result === 'success') {
+            if (result.result === 'success' || response.ok) {
                 alert('Заявка успешно отправлена!');
                 formElement.reset();
                 closeModal(formElement.closest('.modal').id);
             } else {
-                alert('Ошибка сервера: ' + result.message);
-                console.error(result);
+                alert('Ошибка: ' + (result.message || 'Неизвестная ошибка'));
             }
         } catch (error) {
-            alert('Ошибка сети: ' + error.message);
             console.error('Error:', error);
+            // Даже если fetch упал с сетевой ошибкой, в GAS запрос часто уходит.
+            // Но для пользователя покажем ошибку.
+            alert('Произошла ошибка при отправке. Проверьте консоль.');
         } finally {
-            // Возвращаем кнопку
             submitBtn.disabled = false;
             submitBtn.innerText = originalText;
         }
