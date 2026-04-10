@@ -20,77 +20,76 @@
 1. В вашей Google Таблице нажмите **Расширения** → **Apps Script**
 2. Удалите весь существующий код и вставьте следующий:
 
-```const SHEET_NAMES = ["Баги", "Задачи", "Библиотека", "Почта"];
+```
+  const SHEET_NAMES = ["Баги", "Задачи", "Библиотека"];
 
-// 1. Функция инициализации (Создает листы)
-function initSheets() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  SHEET_NAMES.forEach(name => {
-    let sheet = ss.getSheetByName(name);
-    if (!sheet) {
-      sheet = ss.insertSheet(name);
-      // Заголовки
-      sheet.appendRow(["Дата", "Имя", "Email", "Тип/Отдел", "Тема", "Описание", "Приоритет", "Категория"]);
-      sheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#f3f4f6");
-      // Автоширина колонок
-      sheet.autoResizeColumns(1, 8);
-    }
-  });
-}
-
-// 2. Обработка POST запроса (Теперь читаем e.parameter)
-function doPost(e) {
-  try {
-    // Проверка данных
-    if (!e || !e.parameter) {
-      return createJsonResponse("error", "Нет данных в запросе");
-    }
-
-    const data = e.parameter;
-    const sheetName = data.sheetName;
-
-    if (!sheetName || !SHEET_NAMES.includes(sheetName)) {
-      return createJsonResponse("error", "Неверное имя листа: " + sheetName);
-    }
-
+  // 1. Функция для создания листов (Запустить вручную один раз)
+  function initSheets() {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName(sheetName);
+    
+    SHEET_NAMES.forEach(name => {
+      let sheet = ss.getSheetByName(name);
+      if (!sheet) {
+        sheet = ss.insertSheet(name);
+        // Заголовки
+        sheet.appendRow(["Дата", "Имя", "Email", "Отдел", "Тема", "Описание", "Приоритет", "Тип заявки"]);
+        sheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#f3f4f6");
+      }
+    });
+    Logger.log("Листы созданы или уже существуют.");
+  }
 
-    // Если лист удален, создаем заново
-    if (!sheet) {
-      initSheets();
-      sheet = ss.getSheetByName(sheetName);
+  // 2. Обработка POST запроса
+  function doPost(e) {
+    // Защита от ошибок при пустом запросе
+    if (!e || !e.postData || !e.postData.contents) {
+      return createJsonResponse("error", "Нет данных в запросе. Проверьте формат отправки.");
     }
 
-    // Запись данных
-    // data.department теперь содержит либо Отдел, либо Тип проблемы (для почты)
-    sheet.appendRow([
-      new Date(),
-      data.name || "-",
-      data.email || "-",
-      data.department || "-",
-      data.subject || "-",
-      data.description || "-",
-      data.priority || "-",
-      sheetName
-    ]);
+    try {
+      const data = JSON.parse(e.postData.contents);
+      const sheetName = data.sheetName;
 
-    return createJsonResponse("success", "Заявка принята");
+      if (!sheetName || !SHEET_NAMES.includes(sheetName)) {
+        return createJsonResponse("error", "Неверное имя листа: " + sheetName);
+      }
 
-  } catch (err) {
-    return createJsonResponse("error", "Ошибка скрипта: " + err.toString());
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      let sheet = ss.getSheetByName(sheetName);
+
+      // Если лист удалили, создаем снова
+      if (!sheet) {
+        initSheets();
+        sheet = ss.getSheetByName(sheetName);
+      }
+
+      // Запись данных
+      sheet.appendRow([
+        new Date(),
+        data.name || "-",
+        data.email || "-",
+        data.department || "-",
+        data.subject || "-",
+        data.description || "-",
+        data.priority || "-",
+        sheetName
+      ]);
+
+      return createJsonResponse("success", "Заявка принята");
+
+    } catch (err) {
+      return createJsonResponse("error", "Ошибка скрипта: " + err.toString());
+    }
   }
-}
 
-// 3. Ответ JSON
-function createJsonResponse(status, message) {
-  return ContentService.createTextOutput(JSON.stringify({
-    result: status,
-    message: message
-  }))
-  .setMimeType(ContentService.MimeType.JSON);
-}
+  // 3. Вспомогательная функция для правильного CORS ответа
+  function createJsonResponse(status, message) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: status,
+      message: message
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+  }
 ```
 
 3. Нажмите **Файл** → **Сохранить** (или Ctrl+S)
