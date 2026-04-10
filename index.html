@@ -11,6 +11,7 @@
             --success: #16a34a;
             --danger: #dc2626;
             --warning: #ca8a04;
+            --info: #0891b2; /* Цвет для почты */
             --bg: #f8fafc;
         }
 
@@ -45,16 +46,20 @@
             max-width: 1200px;
             width: 100%;
             padding: 0 1rem;
+            margin-bottom: 2rem;
         }
 
         .card {
             background: white;
             border-radius: 12px;
             padding: 2rem;
-            width: 300px;
+            width: 280px;
             text-align: center;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .card:hover { transform: translateY(-5px); }
@@ -77,6 +82,7 @@
         .btn-bugs { background-color: var(--danger); }
         .btn-tasks { background-color: var(--primary); }
         .btn-lib { background-color: var(--warning); }
+        .btn-mail { background-color: var(--info); }
 
         /* Modal Styles */
         .modal {
@@ -147,51 +153,55 @@
 </header>
 
 <div class="container">
+    <!-- Кнопка Баги -->
     <div class="card">
         <h2>🐛 Баги</h2>
-        <p>Сообщить об ошибке в работе системы</p>
+        <p>Сообщить об ошибке</p>
         <button class="btn btn-bugs" onclick="openModal('modal-bugs')">Создать заявку</button>
     </div>
 
+    <!-- Кнопка Задачи -->
     <div class="card">
         <h2>✅ Задачи</h2>
-        <p>Предложить новый функционал или улучшение</p>
+        <p>Новый функционал</p>
         <button class="btn btn-tasks" onclick="openModal('modal-tasks')">Создать заявку</button>
     </div>
 
+    <!-- Кнопка Библиотека -->
     <div class="card">
-        <h2>📚 Электронная библиотека</h2>
-        <p>Запрос на добавление документации или книги</p>
+        <h2>📚 Библиотека</h2>
+        <p>Запрос документации</p>
         <button class="btn btn-lib" onclick="openModal('modal-lib')">Создать заявку</button>
+    </div>
+
+    <!-- Кнопка Почта (НОВАЯ) -->
+    <div class="card">
+        <h2>📧 Админ. почты</h2>
+        <p>Проблемы с email, спам, настройки</p>
+        <button class="btn btn-mail" onclick="openModal('modal-mail')">Создать заявку</button>
     </div>
 </div>
 
-<!-- Модалки -->
+<!-- Модальное окно: Баги -->
 <div id="modal-bugs" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('modal-bugs')">&times;</span>
         <h2>Заявка на баг</h2>
         <form onsubmit="submitForm(event, this, 'Баги')">
             <label>Ваше имя</label>
-            <input type="text" name="name" required placeholder="Иван Иванов">
-            
+            <input type="text" name="name" required>
             <label>Email</label>
-            <input type="email" name="email" required placeholder="ivan@company.com">
-            
+            <input type="email" name="email" required>
             <label>Отдел</label>
             <select name="department">
                 <option value="Разработка">Разработка</option>
                 <option value="Тестирование">Тестирование</option>
-                <option value="Аналитика">Аналитика</option>
                 <option value="Другое">Другое</option>
             </select>
-            
-            <label>Тема ошибки</label>
-            <input type="text" name="subject" required placeholder="Краткое описание">
-            
+            <label>Тема</label>
+            <input type="text" name="subject" required>
             <label>Описание</label>
-            <textarea name="description" required placeholder="Шаги воспроизведения..."></textarea>
-            
+            <textarea name="description" required></textarea>
             <label>Приоритет</label>
             <select name="priority">
                 <option value="Низкий">Низкий</option>
@@ -199,12 +209,12 @@
                 <option value="Высокий">Высокий</option>
                 <option value="Критический">Критический</option>
             </select>
-            
             <button type="submit" class="submit-btn">Отправить</button>
         </form>
     </div>
 </div>
 
+<!-- Модальное окно: Задачи -->
 <div id="modal-tasks" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('modal-tasks')">&times;</span>
@@ -212,36 +222,30 @@
         <form onsubmit="submitForm(event, this, 'Задачи')">
             <label>Ваше имя</label>
             <input type="text" name="name" required>
-            
             <label>Email</label>
             <input type="email" name="email" required>
-            
             <label>Отдел</label>
             <select name="department">
-                <option value="Разработка">Разработка</option>
                 <option value="Бизнес">Бизнес</option>
-                <option value="Маркетинг">Маркетинг</option>
+                <option value="Разработка">Разработка</option>
                 <option value="Другое">Другое</option>
             </select>
-            
-            <label>Тема задачи</label>
+            <label>Тема</label>
             <input type="text" name="subject" required>
-            
-            <label>Описание требования</label>
+            <label>Описание</label>
             <textarea name="description" required></textarea>
-            
             <label>Приоритет</label>
             <select name="priority">
                 <option value="Низкий">Низкий</option>
                 <option value="Средний">Средний</option>
                 <option value="Высокий">Высокий</option>
             </select>
-            
             <button type="submit" class="submit-btn">Отправить</button>
         </form>
     </div>
 </div>
 
+<!-- Модальное окно: Библиотека -->
 <div id="modal-lib" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('modal-lib')">&times;</span>
@@ -249,35 +253,62 @@
         <form onsubmit="submitForm(event, this, 'Библиотека')">
             <label>Ваше имя</label>
             <input type="text" name="name" required>
-            
             <label>Email</label>
             <input type="email" name="email" required>
-            
             <label>Отдел</label>
-            <select name="department">
-                <option value="Любой">Любой</option>
-            </select>
-            
+            <select name="department"><option value="Любой">Любой</option></select>
             <label>Название ресурса</label>
-            <input type="text" name="subject" required placeholder="Название книги/документа">
-            
-            <label>Описание / Ссылка</label>
-            <textarea name="description" required placeholder="Автор, год, ссылка на источник..."></textarea>
-            
+            <input type="text" name="subject" required>
+            <label>Описание</label>
+            <textarea name="description" required></textarea>
             <label>Приоритет</label>
             <select name="priority">
                 <option value="Низкий">Низкий</option>
                 <option value="Средний">Средний</option>
                 <option value="Высокий">Высокий</option>
             </select>
-            
+            <button type="submit" class="submit-btn">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно: Почта (НОВОЕ) -->
+<div id="modal-mail" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('modal-mail')">&times;</span>
+        <h2>Администрирование почты</h2>
+        <form onsubmit="submitForm(event, this, 'Почта')">
+            <label>Ваше имя</label>
+            <input type="text" name="name" required>
+            <label>Email (проблемный ящик)</label>
+            <input type="email" name="email" required placeholder="user@company.com">
+            <label>Тип проблемы</label>
+            <select name="department">
+                <option value="Не приходит письмо">Не приходит письмо</option>
+                <option value="Не уходит письмо">Не уходит письмо</option>
+                <option value="Спам">Спам</option>
+                <option value="Смена пароля">Смена пароля</option>
+                <option value="Настройка клиента">Настройка клиента</option>
+                <option value="Другое">Другое</option>
+            </select>
+            <label>Тема</label>
+            <input type="text" name="subject" required placeholder="От кого/Куда не дошло">
+            <label>Описание</label>
+            <textarea name="description" required placeholder="Время отправки, текст ошибки..."></textarea>
+            <label>Приоритет</label>
+            <select name="priority">
+                <option value="Низкий">Низкий</option>
+                <option value="Средний">Средний</option>
+                <option value="Высокий">Высокий</option>
+                <option value="Критический">Критический</option>
+            </select>
             <button type="submit" class="submit-btn">Отправить</button>
         </form>
     </div>
 </div>
 
 <script>
-    // ВСТАВЬТЕ СЮДА ВАШ URL
+    // !!! ВСТАВЬТЕ СЮДА ВАШ НОВЫЙ URL (если меняли развертывание) !!!
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec';
 
     function openModal(modalId) {
@@ -300,49 +331,35 @@
 
         const submitBtn = formElement.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerText;
-        
         submitBtn.disabled = true;
         submitBtn.innerText = 'Отправка...';
 
         try {
-            // 1. Создаем FormData из формы
             const formData = new FormData(formElement);
-            // 2. Добавляем имя листа явно
+            // Добавляем имя листа явно
             formData.append('sheetName', sheetName);
 
-            // 3. Отправляем FormData БЕЗ заголовков Content-Type
-            // Браузер сам выставит multipart/form-data и boundary, что убирает CORS ошибку
+            // Отправляем как FormData (application/x-www-form-urlencoded)
+            // Это ИЗБЕГАЕТ CORS ошибки preflight запроса
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: formData 
-                // Заголовки НЕ указываем!
+                // Заголовок Content-Type ставить НЕ НУЖНО, браузер сам поставит правильный с границами
             });
 
-            // Google Apps Script делает редирект после выполнения, fetch следует за ним автоматически.
-            // Но иногда ответ приходит пустой или с текстом. Пробуем получить текст.
-            const text = await response.text();
-            
-            // Пытаемся распарсить ответ, если он JSON (иногда GAS возвращает JSON внутри текста)
-            let result;
-            try {
-                result = JSON.parse(text);
-            } catch (e) {
-                // Если не JSON, считаем успехом сам факт ответа 200 OK от GAS
-                result = { result: 'success', message: 'Заявка отправлена' };
-            }
+            const result = await response.json();
 
-            if (result.result === 'success' || response.ok) {
+            if (result.result === 'success') {
                 alert('Заявка успешно отправлена!');
                 formElement.reset();
-                closeModal(formElement.closest('.modal').id);
+                const modal = formElement.closest('.modal');
+                if (modal) modal.style.display = 'none';
             } else {
-                alert('Ошибка: ' + (result.message || 'Неизвестная ошибка'));
+                alert('Ошибка: ' + result.message);
             }
         } catch (error) {
+            alert('Ошибка сети: ' + error.message);
             console.error('Error:', error);
-            // Даже если fetch упал с сетевой ошибкой, в GAS запрос часто уходит.
-            // Но для пользователя покажем ошибку.
-            alert('Произошла ошибка при отправке. Проверьте консоль.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerText = originalText;
