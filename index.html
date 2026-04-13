@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="googlebot" content="noindex, nofollow">
     <title>Система заявок MIF</title>
-    
+
     <style>
         :root {
             --primary: #2563eb;
@@ -32,7 +33,10 @@
         /* --- Стили экрана авторизации --- */
         #auth-screen {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: white;
             z-index: 9999;
             display: flex;
@@ -48,7 +52,7 @@
             width: 100%;
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
         }
 
@@ -74,9 +78,17 @@
             font-size: 1rem;
         }
 
-        .auth-btn:hover { background: #f1f5f9; }
-        .auth-btn.google { color: #DB4437; }
-        .auth-btn.yandex { color: #FC3F1D; }
+        .auth-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .auth-btn.google {
+            color: #DB4437;
+        }
+
+        .auth-btn.yandex {
+            color: #FC3F1D;
+        }
 
         .error-msg {
             color: var(--danger);
@@ -85,11 +97,15 @@
             display: none;
         }
 
-        .loading { color: var(--secondary); font-style: italic; }
+        .loading {
+            color: var(--secondary);
+            font-style: italic;
+        }
 
         /* --- Основной контент (скрыт по умолчанию) --- */
         #app-content {
-            display: none; /* Скрыто до авторизации */
+            display: none;
+            /* Скрыто до авторизации */
             width: 100%;
             flex-direction: column;
             align-items: center;
@@ -99,7 +115,7 @@
             background: white;
             width: 100%;
             padding: 1.5rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             text-align: center;
             margin-bottom: 2rem;
             position: relative;
@@ -126,10 +142,21 @@
             cursor: pointer;
             font-size: 0.8rem;
         }
-        .logout-btn:hover { background: var(--danger); color: white; }
 
-        h1 { color: #1e293b; margin: 0; }
-        p { color: var(--secondary); margin-top: 0.5rem; }
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        h1 {
+            color: #1e293b;
+            margin: 0;
+        }
+
+        p {
+            color: var(--secondary);
+            margin-top: 0.5rem;
+        }
 
         .container {
             display: flex;
@@ -151,7 +178,9 @@
             transition: transform 0.2s;
         }
 
-        .card:hover { transform: translateY(-5px); }
+        .card:hover {
+            transform: translateY(-5px);
+        }
 
         .btn {
             display: inline-block;
@@ -166,18 +195,31 @@
             font-size: 1rem;
         }
 
-        .btn-bugs { background-color: var(--danger); }
-        .btn-tasks { background-color: var(--primary); }
-        .btn-lib { background-color: var(--warning); }
-        .btn-admin { background-color: #475569; }
+        .btn-bugs {
+            background-color: var(--danger);
+        }
+
+        .btn-tasks {
+            background-color: var(--primary);
+        }
+
+        .btn-lib {
+            background-color: var(--warning);
+        }
+
+        .btn-admin {
+            background-color: #475569;
+        }
 
         /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -196,17 +238,28 @@
 
         .close-btn {
             position: absolute;
-            top: 1rem; right: 1rem;
+            top: 1rem;
+            right: 1rem;
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--secondary);
         }
 
-        form { display: flex; flex-direction: column; gap: 1rem; }
-        
-        label { font-weight: 600; font-size: 0.9rem; color: #334155; }
-        
-        input, select, textarea {
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        input,
+        select,
+        textarea {
             padding: 0.75rem;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
@@ -215,7 +268,10 @@
             box-sizing: border-box;
         }
 
-        textarea { resize: vertical; min-height: 100px; }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
 
         .submit-btn {
             background-color: var(--success);
@@ -227,305 +283,319 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .submit-btn:disabled { background-color: #94a3b8; }
+
+        .submit-btn:disabled {
+            background-color: #94a3b8;
+        }
     </style>
 </head>
+
 <body>
 
-<!-- ЭКРАН АВТОРИЗАЦИИ -->
-<div id="auth-screen">
-    <div class="auth-box">
-        <div class="auth-logo">🔒</div>
-        <h2>Корпоративный доступ</h2>
-        <p style="margin-bottom: 20px;">Вход доступен только для сотрудников<br>@mann-ivanov-ferber.ru и @m-i-f.ru</p>
-        
-        <button class="auth-btn google" onclick="login('google')">
-            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#DB4437" d="M9 7.5V4.5h9v3H9z"/><path fill="#4285F4" d="M9 13.5v-3h9v3H9z"/><path fill="#0F9D58" d="M4.5 9v3h3V9h-3z"/><path fill="#F4B400" d="M4.5 4.5v3h3v-3h-3z"/></svg>
-            Войти через Google
-        </button>
-        
-        <button class="auth-btn yandex" onclick="login('yandex')">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#FC3F1D" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6z"/></svg>
-            Войти через Яндекс
-        </button>
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <div class="auth-logo">🔒</div>
+            <h2>Корпоративный доступ</h2>
+            <p style="margin-bottom: 20px;">Вход доступен только для сотрудников<br>@mann-ivanov-ferber.ru и @m-i-f.ru
+            </p>
 
-        <div id="auth-error" class="error-msg"></div>
-        <div id="auth-loading" class="loading" style="display:none; margin-top:15px;">Проверка доступа...</div>
-    </div>
-</div>
+            <button class="auth-btn google" onclick="login('google')">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path fill="#DB4437" d="M9 7.5V4.5h9v3H9z" />
+                    <path fill="#4285F4" d="M9 13.5v-3h9v3H9z" />
+                    <path fill="#0F9D58" d="M4.5 9v3h3V9h-3z" />
+                    <path fill="#F4B400" d="M4.5 4.5v3h3v-3h-3z" />
+                </svg>
+                Войти через Google
+            </button>
 
-<!-- ОСНОВНОЙ КОНТЕНТ САЙТА -->
-<div id="app-content">
-    <header>
-        <h1>Портал заявок</h1>
-        <p>Система учета багов, задач и библиотечных запросов</p>
-        <div class="user-info">
-            <span id="user-email"></span>
-            <button class="logout-btn" onclick="logout()">Выйти</button>
+            <button class="auth-btn yandex" onclick="login('yandex')">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#FC3F1D"
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6z" />
+                </svg>
+                Войти через Яндекс
+            </button>
+
+            <div id="auth-error" class="error-msg"></div>
+            <div id="auth-loading" class="loading" style="display:none; margin-top:15px;">Проверка доступа...</div>
         </div>
-    </header>
+    </div>
 
-    <div class="container">
+    <!-- ОСНОВНОЙ КОНТЕНТ САЙТА -->
+    <div id="app-content">
+        <header>
+            <h1>Портал заявок</h1>
+            <p>Система учета багов, задач и библиотечных запросов</p>
+            <div class="user-info">
+                <span id="user-email"></span>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Баги -->
+            <div class="card">
+                <h2>🐛 Баги</h2>
+                <p>Сообщить об ошибке</p>
+                <button class="btn btn-bugs" onclick="openModal('modal-bugs')">Создать заявку</button>
+            </div>
+
+            <!-- Задачи -->
+            <div class="card">
+                <h2>✅ Задачи</h2>
+                <p>Новый функционал</p>
+                <button class="btn btn-tasks" onclick="openModal('modal-tasks')">Создать заявку</button>
+            </div>
+
+            <!-- Библиотека -->
+            <div class="card">
+                <h2>📚 Библиотека</h2>
+                <p>Запрос литературы</p>
+                <button class="btn btn-lib" onclick="openModal('modal-lib')">Создать заявку</button>
+            </div>
+
+            <!-- Администрирование почты -->
+            <div class="card">
+                <h2>📧 Почта</h2>
+                <p>Администрирование</p>
+                <button class="btn btn-admin" onclick="openModal('modal-mail')">Создать заявку</button>
+            </div>
+        </div>
+
+        <!-- Модальные окна (те же самые, что были раньше) -->
         <!-- Баги -->
-        <div class="card">
-            <h2>🐛 Баги</h2>
-            <p>Сообщить об ошибке</p>
-            <button class="btn btn-bugs" onclick="openModal('modal-bugs')">Создать заявку</button>
+        <div id="modal-bugs" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal('modal-bugs')">&times;</span>
+                <h2>Заявка на баг</h2>
+                <form onsubmit="submitForm(event, this, 'Баги')">
+                    <input type="hidden" name="type" value="Баг">
+                    <label>Тема ошибки</label>
+                    <input type="text" name="subject" required>
+                    <label>Описание</label>
+                    <textarea name="description" required></textarea>
+                    <label>Приоритет</label>
+                    <select name="priority">
+                        <option value="Низкий">Низкий</option>
+                        <option value="Средний">Средний</option>
+                        <option value="Высокий">Высокий</option>
+                        <option value="Критический">Критический</option>
+                    </select>
+                    <button type="submit" class="submit-btn">Отправить</button>
+                </form>
+            </div>
         </div>
 
         <!-- Задачи -->
-        <div class="card">
-            <h2>✅ Задачи</h2>
-            <p>Новый функционал</p>
-            <button class="btn btn-tasks" onclick="openModal('modal-tasks')">Создать заявку</button>
+        <div id="modal-tasks" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal('modal-tasks')">&times;</span>
+                <h2>Новая задача</h2>
+                <form onsubmit="submitForm(event, this, 'Задачи')">
+                    <input type="hidden" name="type" value="Задача">
+                    <label>Тема задачи</label>
+                    <input type="text" name="subject" required>
+                    <label>Описание</label>
+                    <textarea name="description" required></textarea>
+                    <label>Приоритет</label>
+                    <select name="priority">
+                        <option value="Низкий">Низкий</option>
+                        <option value="Средний">Средний</option>
+                        <option value="Высокий">Высокий</option>
+                    </select>
+                    <button type="submit" class="submit-btn">Отправить</button>
+                </form>
+            </div>
         </div>
 
         <!-- Библиотека -->
-        <div class="card">
-            <h2>📚 Библиотека</h2>
-            <p>Запрос литературы</p>
-            <button class="btn btn-lib" onclick="openModal('modal-lib')">Создать заявку</button>
+        <div id="modal-lib" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal('modal-lib')">&times;</span>
+                <h2>Запрос в библиотеку</h2>
+                <form onsubmit="submitForm(event, this, 'Библиотека')">
+                    <input type="hidden" name="type" value="Библиотека">
+                    <label>Название ресурса</label>
+                    <input type="text" name="subject" required>
+                    <label>Описание / Ссылка</label>
+                    <textarea name="description" required></textarea>
+                    <label>Приоритет</label>
+                    <select name="priority">
+                        <option value="Низкий">Низкий</option>
+                        <option value="Средний">Средний</option>
+                        <option value="Высокий">Высокий</option>
+                    </select>
+                    <button type="submit" class="submit-btn">Отправить</button>
+                </form>
+            </div>
         </div>
 
-        <!-- Администрирование почты -->
-        <div class="card">
-            <h2>📧 Почта</h2>
-            <p>Администрирование</p>
-            <button class="btn btn-admin" onclick="openModal('modal-mail')">Создать заявку</button>
-        </div>
-    </div>
-
-    <!-- Модальные окна (те же самые, что были раньше) -->
-    <!-- Баги -->
-    <div id="modal-bugs" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('modal-bugs')">&times;</span>
-            <h2>Заявка на баг</h2>
-            <form onsubmit="submitForm(event, this, 'Баги')">
-                <input type="hidden" name="type" value="Баг">
-                <label>Тема ошибки</label>
-                <input type="text" name="subject" required>
-                <label>Описание</label>
-                <textarea name="description" required></textarea>
-                <label>Приоритет</label>
-                <select name="priority">
-                    <option value="Низкий">Низкий</option>
-                    <option value="Средний">Средний</option>
-                    <option value="Высокий">Высокий</option>
-                    <option value="Критический">Критический</option>
-                </select>
-                <button type="submit" class="submit-btn">Отправить</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Задачи -->
-    <div id="modal-tasks" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('modal-tasks')">&times;</span>
-            <h2>Новая задача</h2>
-            <form onsubmit="submitForm(event, this, 'Задачи')">
-                <input type="hidden" name="type" value="Задача">
-                <label>Тема задачи</label>
-                <input type="text" name="subject" required>
-                <label>Описание</label>
-                <textarea name="description" required></textarea>
-                <label>Приоритет</label>
-                <select name="priority">
-                    <option value="Низкий">Низкий</option>
-                    <option value="Средний">Средний</option>
-                    <option value="Высокий">Высокий</option>
-                </select>
-                <button type="submit" class="submit-btn">Отправить</button>
-            </form>
+        <!-- Почта -->
+        <div id="modal-mail" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal('modal-mail')">&times;</span>
+                <h2>Администрирование почты</h2>
+                <form onsubmit="submitForm(event, this, 'Почта')">
+                    <input type="hidden" name="type" value="Почта">
+                    <label>Тема запроса</label>
+                    <input type="text" name="subject" required placeholder="Например: Создание ящика">
+                    <label>Описание</label>
+                    <textarea name="description" required></textarea>
+                    <label>Приоритет</label>
+                    <select name="priority">
+                        <option value="Низкий">Низкий</option>
+                        <option value="Средний">Средний</option>
+                        <option value="Высокий">Высокий</option>
+                    </select>
+                    <button type="submit" class="submit-btn">Отправить</button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Библиотека -->
-    <div id="modal-lib" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('modal-lib')">&times;</span>
-            <h2>Запрос в библиотеку</h2>
-            <form onsubmit="submitForm(event, this, 'Библиотека')">
-                <input type="hidden" name="type" value="Библиотека">
-                <label>Название ресурса</label>
-                <input type="text" name="subject" required>
-                <label>Описание / Ссылка</label>
-                <textarea name="description" required></textarea>
-                <label>Приоритет</label>
-                <select name="priority">
-                    <option value="Низкий">Низкий</option>
-                    <option value="Средний">Средний</option>
-                    <option value="Высокий">Высокий</option>
-                </select>
-                <button type="submit" class="submit-btn">Отправить</button>
-            </form>
-        </div>
-    </div>
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    <!-- Почта -->
-    <div id="modal-mail" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('modal-mail')">&times;</span>
-            <h2>Администрирование почты</h2>
-            <form onsubmit="submitForm(event, this, 'Почта')">
-                <input type="hidden" name="type" value="Почта">
-                <label>Тема запроса</label>
-                <input type="text" name="subject" required placeholder="Например: Создание ящика">
-                <label>Описание</label>
-                <textarea name="description" required></textarea>
-                <label>Приоритет</label>
-                <select name="priority">
-                    <option value="Низкий">Низкий</option>
-                    <option value="Средний">Средний</option>
-                    <option value="Высокий">Высокий</option>
-                </select>
-                <button type="submit" class="submit-btn">Отправить</button>
-            </form>
-        </div>
-    </div>
-</div>
+        // !!! ВСТАВЬТЕ СЮДА ВАШИ НАСТРОЙКИ FIREBASE !!!
+        // Их можно взять в консоли Firebase: Project Settings -> General -> Your apps -> SDK setup and configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTAVwPWCc1jk5onNtyvBoxaRkThoePpfE",
+            authDomain: "mif-tracker.firebaseapp.com",
+            projectId: "mif-tracker",
+            storageBucket: "mif-tracker.firebasestorage.app",
+            messagingSenderId: "G-PD49797S54",
+            appId: "1:1061013972081:web:d771ef9cabea71c183a7d0"
+        };
 
-<!-- FIREBASE SDK -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // Инициализация
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    // !!! ВСТАВЬТЕ СЮДА ВАШИ НАСТРОЙКИ FIREBASE !!!
-    // Их можно взять в консоли Firebase: Project Settings -> General -> Your apps -> SDK setup and configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSy...",
-        authDomain: "ваш-проект.firebaseapp.com",
-        projectId: "ваш-проект",
-        storageBucket: "ваш-проект.appspot.com",
-        messagingSenderId: "...",
-        appId: "..."
-    };
+        // Разрешенные домены
+        const ALLOWED_DOMAINS = ["mann-ivanov-ferber.ru", "m-i-f.ru"];
 
-    // Инициализация
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        // Элементы UI
+        const authScreen = document.getElementById('auth-screen');
+        const appContent = document.getElementById('app-content');
+        const userEmailSpan = document.getElementById('user-email');
+        const errorMsg = document.getElementById('auth-error');
+        const loadingMsg = document.getElementById('auth-loading');
 
-    // Разрешенные домены
-    const ALLOWED_DOMAINS = ["mann-ivanov-ferber.ru", "m-i-f.ru"];
+        // Провайдеры
+        const googleProvider = new GoogleAuthProvider();
+        const yandexProvider = new OAuthProvider('yandex.com');
 
-    // Элементы UI
-    const authScreen = document.getElementById('auth-screen');
-    const appContent = document.getElementById('app-content');
-    const userEmailSpan = document.getElementById('user-email');
-    const errorMsg = document.getElementById('auth-error');
-    const loadingMsg = document.getElementById('auth-loading');
+        // Функция входа (экспортируем в window для доступа из HTML)
+        window.login = (providerName) => {
+            errorMsg.style.display = 'none';
+            loadingMsg.style.display = 'block';
 
-    // Провайдеры
-    const googleProvider = new GoogleAuthProvider();
-    const yandexProvider = new OAuthProvider('yandex.com');
+            let provider = providerName === 'google' ? googleProvider : yandexProvider;
 
-    // Функция входа (экспортируем в window для доступа из HTML)
-    window.login = (providerName) => {
-        errorMsg.style.display = 'none';
-        loadingMsg.style.display = 'block';
-        
-        let provider = providerName === 'google' ? googleProvider : yandexProvider;
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const email = result.user.email;
+                    checkDomain(email);
+                }).catch((error) => {
+                    showError("Ошибка входа: " + error.message);
+                });
+        };
 
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                const email = result.user.email;
-                checkDomain(email);
-            }).catch((error) => {
-                showError("Ошибка входа: " + error.message);
+        // Функция выхода
+        window.logout = () => {
+            signOut(auth).then(() => {
+                location.reload();
             });
-    };
+        };
 
-    // Функция выхода
-    window.logout = () => {
-        signOut(auth).then(() => {
-            location.reload();
-        });
-    };
-
-    // Проверка домена
-    function checkDomain(email) {
-        const domain = email.split('@')[1];
-        if (ALLOWED_DOMAINS.includes(domain)) {
-            // Успех
-            loadingMsg.style.display = 'none';
-            authScreen.style.display = 'none';
-            appContent.style.display = 'flex';
-            userEmailSpan.textContent = email;
-        } else {
-            // Отказ в доступе
-            showError(`Доступ запрещен. Ваш домен (${domain}) не входит в список разрешенных.`);
-            signOut(auth); // Выходим сразу
-        }
-    }
-
-    function showError(msg) {
-        loadingMsg.style.display = 'none';
-        errorMsg.textContent = msg;
-        errorMsg.style.display = 'block';
-    }
-
-    // Слушатель состояния авторизации (при перезагрузке страницы)
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            checkDomain(user.email);
-        } else {
-            // Пользователь не залогинен
-            authScreen.style.display = 'flex';
-            appContent.style.display = 'none';
-        }
-    });
-
-    // --- Логика отправки форм (осталась прежней) ---
-    window.openModal = (id) => document.getElementById(id).style.display = 'flex';
-    window.closeModal = (id) => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = 'none';
-    };
-    
-    // Закрытие по клику вне
-    window.onclick = (e) => {
-        if (e.target.classList.contains('modal')) e.target.style.display = 'none';
-    };
-
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec'; // Ваш URL
-
-    window.submitForm = async (event, formElement, sheetName) => {
-        event.preventDefault();
-        const submitBtn = formElement.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerText;
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Отправка...';
-
-        try {
-            const formData = new FormData(formElement);
-            const data = Object.fromEntries(formData.entries());
-            data.sheetName = sheetName;
-            // Добавляем email автора заявки из сессии Firebase
-            data.authorEmail = auth.currentUser.email; 
-
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            const result = await response.json();
-            if (result.result === 'success') {
-                alert('Заявка отправлена!');
-                formElement.reset();
-                closeModal(formElement.closest('.modal').id);
+        // Проверка домена
+        function checkDomain(email) {
+            const domain = email.split('@')[1];
+            if (ALLOWED_DOMAINS.includes(domain)) {
+                // Успех
+                loadingMsg.style.display = 'none';
+                authScreen.style.display = 'none';
+                appContent.style.display = 'flex';
+                userEmailSpan.textContent = email;
             } else {
-                alert('Ошибка: ' + result.message);
+                // Отказ в доступе
+                showError(`Доступ запрещен. Ваш домен (${domain}) не входит в список разрешенных.`);
+                signOut(auth); // Выходим сразу
             }
-        } catch (error) {
-            alert('Ошибка сети: ' + error.message);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalText;
         }
-    };
-</script>
+
+        function showError(msg) {
+            loadingMsg.style.display = 'none';
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        // Слушатель состояния авторизации (при перезагрузке страницы)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                checkDomain(user.email);
+            } else {
+                // Пользователь не залогинен
+                authScreen.style.display = 'flex';
+                appContent.style.display = 'none';
+            }
+        });
+
+        // --- Логика отправки форм (осталась прежней) ---
+        window.openModal = (id) => document.getElementById(id).style.display = 'flex';
+        window.closeModal = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        };
+
+        // Закрытие по клику вне
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+        };
+
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec'; // Ваш URL
+
+        window.submitForm = async (event, formElement, sheetName) => {
+            event.preventDefault();
+            const submitBtn = formElement.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Отправка...';
+
+            try {
+                const formData = new FormData(formElement);
+                const data = Object.fromEntries(formData.entries());
+                data.sheetName = sheetName;
+                // Добавляем email автора заявки из сессии Firebase
+                data.authorEmail = auth.currentUser.email;
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+                if (result.result === 'success') {
+                    alert('Заявка отправлена!');
+                    formElement.reset();
+                    closeModal(formElement.closest('.modal').id);
+                } else {
+                    alert('Ошибка: ' + result.message);
+                }
+            } catch (error) {
+                alert('Ошибка сети: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
+        };
+    </script>
 
 </body>
+
 </html>
