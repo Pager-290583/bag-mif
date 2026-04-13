@@ -105,7 +105,6 @@
         /* --- Основной контент (скрыт по умолчанию) --- */
         #app-content {
             display: none;
-            /* Скрыто до авторизации */
             width: 100%;
             flex-direction: column;
             align-items: center;
@@ -335,28 +334,21 @@
         </header>
 
         <div class="container">
-            <!-- Баги -->
             <div class="card">
                 <h2>🐛 Баги</h2>
                 <p>Сообщить об ошибке</p>
                 <button class="btn btn-bugs" onclick="openModal('modal-bugs')">Создать заявку</button>
             </div>
-
-            <!-- Задачи -->
             <div class="card">
                 <h2>✅ Задачи</h2>
                 <p>Новый функционал</p>
                 <button class="btn btn-tasks" onclick="openModal('modal-tasks')">Создать заявку</button>
             </div>
-
-            <!-- Библиотека -->
             <div class="card">
                 <h2>📚 Библиотека</h2>
                 <p>Запрос литературы</p>
                 <button class="btn btn-lib" onclick="openModal('modal-lib')">Создать заявку</button>
             </div>
-
-            <!-- Администрирование почты -->
             <div class="card">
                 <h2>📧 Почта</h2>
                 <p>Администрирование</p>
@@ -364,8 +356,7 @@
             </div>
         </div>
 
-        <!-- Модальные окна (те же самые, что были раньше) -->
-        <!-- Баги -->
+        <!-- Модальные окна -->
         <div id="modal-bugs" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal('modal-bugs')">&times;</span>
@@ -388,7 +379,6 @@
             </div>
         </div>
 
-        <!-- Задачи -->
         <div id="modal-tasks" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal('modal-tasks')">&times;</span>
@@ -410,7 +400,6 @@
             </div>
         </div>
 
-        <!-- Библиотека -->
         <div id="modal-lib" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal('modal-lib')">&times;</span>
@@ -432,7 +421,6 @@
             </div>
         </div>
 
-        <!-- Почта -->
         <div id="modal-mail" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal('modal-mail')">&times;</span>
@@ -460,8 +448,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // !!! ВСТАВЬТЕ СЮДА ВАШИ НАСТРОЙКИ FIREBASE !!!
-        // Их можно взять в консоли Firebase: Project Settings -> General -> Your apps -> SDK setup and configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBTAVwPWCc1jk5onNtyvBoxaRkThoePpfE",
             authDomain: "mif-tracker.firebaseapp.com",
@@ -471,60 +457,40 @@
             appId: "1:1061013972081:web:d771ef9cabea71c183a7d0"
         };
 
-        // Инициализация
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
-        // Разрешенные домены
         const ALLOWED_DOMAINS = ["mann-ivanov-ferber.ru", "m-i-f.ru"];
 
-        // Элементы UI
         const authScreen = document.getElementById('auth-screen');
         const appContent = document.getElementById('app-content');
         const userEmailSpan = document.getElementById('user-email');
         const errorMsg = document.getElementById('auth-error');
         const loadingMsg = document.getElementById('auth-loading');
 
-        // Провайдеры
         const googleProvider = new GoogleAuthProvider();
         const yandexProvider = new OAuthProvider('yandex.com');
 
-        // Функция входа (экспортируем в window для доступа из HTML)
         window.login = (providerName) => {
             errorMsg.style.display = 'none';
             loadingMsg.style.display = 'block';
-
             let provider = providerName === 'google' ? googleProvider : yandexProvider;
-
             signInWithPopup(auth, provider)
-                .then((result) => {
-                    const email = result.user.email;
-                    checkDomain(email);
-                }).catch((error) => {
-                    showError("Ошибка входа: " + error.message);
-                });
+                .then((result) => checkDomain(result.user.email))
+                .catch((error) => showError("Ошибка входа: " + error.message));
         };
 
-        // Функция выхода
-        window.logout = () => {
-            signOut(auth).then(() => {
-                location.reload();
-            });
-        };
+        window.logout = () => signOut(auth).then(() => location.reload());
 
-        // Проверка домена
         function checkDomain(email) {
             const domain = email.split('@')[1];
             if (ALLOWED_DOMAINS.includes(domain)) {
-                // Успех
                 loadingMsg.style.display = 'none';
                 authScreen.style.display = 'none';
                 appContent.style.display = 'flex';
                 userEmailSpan.textContent = email;
             } else {
-                // Отказ в доступе
-                showError(`Доступ запрещен. Ваш домен (${domain}) не входит в список разрешенных.`);
-                signOut(auth); // Выходим сразу
+                showError(`Доступ запрещен. Домен ${domain} не разрешен.`);
+                signOut(auth);
             }
         }
 
@@ -534,98 +500,72 @@
             errorMsg.style.display = 'block';
         }
 
-        // Слушатель состояния авторизации (при перезагрузке страницы)
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                checkDomain(user.email);
-            } else {
-                // Пользователь не залогинен
+            if (user) checkDomain(user.email);
+            else {
                 authScreen.style.display = 'flex';
                 appContent.style.display = 'none';
             }
         });
 
-        // --- Логика отправки форм (осталась прежней) ---
         window.openModal = (id) => document.getElementById(id).style.display = 'flex';
         window.closeModal = (id) => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         };
+        window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
-        // Закрытие по клику вне
-        window.onclick = (e) => {
-            if (e.target.classList.contains('modal')) e.target.style.display = 'none';
-        };
+        // ИСПРАВЛЕНО: Убраны пробелы в URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec';
 
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec'; // Ваш URL
-
-        async function submitForm(event, formElement, sheetName) {
+        window.submitForm = async (event, formElement, sheetName) => {
             event.preventDefault();
-
             const submitBtn = formElement.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
-
-            // Блокируем кнопку
             submitBtn.disabled = true;
             submitBtn.innerText = 'Отправка...';
 
             try {
-                // 1. Собираем данные формы
                 const formData = new FormData(formElement);
-                formData.append('sheetName', sheetName); // Добавляем имя листа
+                formData.append('sheetName', sheetName);
 
-                // 2. Добавляем email авторизованного пользователя (если есть)
-                if (user && user.email) {
-                    formData.append('authEmail', user.email);
+                // ИСПРАВЛЕНО: Получаем текущего пользователя корректно
+                const currentUser = auth.currentUser;
+                if (currentUser && currentUser.email) {
+                    formData.append('authEmail', currentUser.email);
                 }
 
-                // 3. Отправляем КАК FORM DATA (без заголовка Content-Type, браузер сам поставит нужный)
-                // Это убирает preflight запрос (OPTIONS) и решает проблему CORS
+                // Отправляем как FormData (без заголовков Content-Type)
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: formData
-                    // ВАЖНО: Не указываем headers: { 'Content-Type': ... }
                 });
 
-                // Google возвращает редирект, fetch следует за ним автоматически.
-                // Ответ может прийти в виде текста или HTML, нам нужно распарсить JSON из текста.
-                const textResponse = await response.text();
-
-                // Пытаемся найти JSON в ответе (иногда Google оборачивает его в HTML)
+                const text = await response.text();
                 let result;
                 try {
-                    // Ищем чистый JSON в ответе
-                    const jsonMatch = textResponse.match(/{.*}/);
-                    if (jsonMatch) {
-                        result = JSON.parse(jsonMatch[0]);
-                    } else {
-                        // Если ответа нет, считаем успехом сам факт статуса 200
-                        result = { result: 'success', message: 'Заявка отправлена' };
-                    }
+                    const jsonMatch = text.match(/{.*}/s);
+                    result = jsonMatch ? JSON.parse(jsonMatch[0]) : { result: 'success' };
                 } catch (e) {
-                    console.warn("Не удалось распарсить JSON, но запрос ушел:", e);
-                    result = { result: 'success', message: 'Заявка отправлена' };
+                    result = { result: 'success' };
                 }
 
                 if (result.result === 'success') {
                     alert('Заявка успешно отправлена!');
                     formElement.reset();
-                    const modal = formElement.closest('.modal');
-                    if (modal) modal.style.display = 'none';
+                    closeModal(formElement.closest('.modal').id);
                 } else {
-                    alert('Ошибка сервера: ' + (result.message || 'Неизвестная ошибка'));
+                    alert('Ошибка: ' + (result.message || 'Неизвестная ошибка'));
                 }
-
             } catch (error) {
-                console.error('Full error:', error);
+                console.error(error);
                 alert('Ошибка сети: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalText;
             }
-        }
+        };
     </script>
-
 </body>
 
 </html>
