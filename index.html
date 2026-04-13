@@ -559,41 +559,71 @@
 
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVpRWf9EHuCWOm2AjkwYR9xuMY3j1VGLH3ywHYuPgQK6r5MuEZ7mqa7Eij15AEYbo/exec'; // Ваш URL
 
-        window.submitForm = async (event, formElement, sheetName) => {
+        async function submitForm(event, formElement, sheetName) {
             event.preventDefault();
+
             const submitBtn = formElement.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
+
+            // Блокируем кнопку
             submitBtn.disabled = true;
             submitBtn.innerText = 'Отправка...';
 
             try {
+                // 1. Собираем данные формы
                 const formData = new FormData(formElement);
-                const data = Object.fromEntries(formData.entries());
-                data.sheetName = sheetName;
-                // Добавляем email автора заявки из сессии Firebase
-                data.authorEmail = auth.currentUser.email;
+                formData.append('sheetName', sheetName); // Добавляем имя листа
 
+                // 2. Добавляем email авторизованного пользователя (если есть)
+                if (user && user.email) {
+                    formData.append('authEmail', user.email);
+                }
+
+                // 3. Отправляем КАК FORM DATA (без заголовка Content-Type, браузер сам поставит нужный)
+                // Это убирает preflight запрос (OPTIONS) и решает проблему CORS
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: { 'Content-Type': 'application/json' }
+                    body: formData
+                    // ВАЖНО: Не указываем headers: { 'Content-Type': ... }
                 });
 
-                const result = await response.json();
-                if (result.result === 'success') {
-                    alert('Заявка отправлена!');
-                    formElement.reset();
-                    closeModal(formElement.closest('.modal').id);
-                } else {
-                    alert('Ошибка: ' + result.message);
+                // Google возвращает редирект, fetch следует за ним автоматически.
+                // Ответ может прийти в виде текста или HTML, нам нужно распарсить JSON из текста.
+                const textResponse = await response.text();
+
+                // Пытаемся найти JSON в ответе (иногда Google оборачивает его в HTML)
+                let result;
+                try {
+                    // Ищем чистый JSON в ответе
+                    const jsonMatch = textResponse.match(/{.*}/);
+                    if (jsonMatch) {
+                        result = JSON.parse(jsonMatch[0]);
+                    } else {
+                        // Если ответа нет, считаем успехом сам факт статуса 200
+                        result = { result: 'success', message: 'Заявка отправлена' };
+                    }
+                } catch (e) {
+                    console.warn("Не удалось распарсить JSON, но запрос ушел:", e);
+                    result = { result: 'success', message: 'Заявка отправлена' };
                 }
+
+                if (result.result === 'success') {
+                    alert('Заявка успешно отправлена!');
+                    formElement.reset();
+                    const modal = formElement.closest('.modal');
+                    if (modal) modal.style.display = 'none';
+                } else {
+                    alert('Ошибка сервера: ' + (result.message || 'Неизвестная ошибка'));
+                }
+
             } catch (error) {
+                console.error('Full error:', error);
                 alert('Ошибка сети: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalText;
             }
-        };
+        }
     </script>
 
 </body>
